@@ -3,7 +3,7 @@ package name.nikolaikochkin.ratelimiter.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import name.nikolaikochkin.ratelimiter.aspect.RateLimit;
+import name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync;
 import name.nikolaikochkin.ratelimiter.service.LimitedService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,14 +19,14 @@ public class LimitedController {
     private final LimitedService limitedService;
 
     @GetMapping("controller")
-    @RateLimit
+    @RateLimitAsync
     public Mono<Void> limitedControllerMonoMethod() {
         log.debug("Handle limited controller Mono method");
         return Mono.empty();
     }
 
     @GetMapping("controller/flux")
-    @RateLimit
+    @RateLimitAsync
     public Flux<Void> limitedControllerFluxMethod() {
         log.debug("Handle limited controller Flux method");
         return Flux.empty();
