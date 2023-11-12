@@ -80,9 +80,14 @@ public class RateLimitAspect {
      */
     private Mono<Object> checkLimits() {
         return Mono.deferContextual(Mono::just)
-                .map(contextView -> contextView.<ServerHttpRequest>getOrDefault(ServerHttpRequest.class, null))
+                .mapNotNull(contextView -> contextView.<ServerHttpRequest>getOrDefault(ServerHttpRequest.class, null))
                 .flatMap(clientService::clientFromHttpRequest)
-                .map(rateLimitService::allowClientRequest)
-                .flatMap(allowed -> allowed ? Mono.empty() : Mono.error(new RateLimitExceededException()));
+                .flatMap(client -> {
+                    if (rateLimitService.allowClientRequest(client)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(() -> new RateLimitExceededException(client + " has exceeded his limit."));
+                    }
+                });
     }
 }
