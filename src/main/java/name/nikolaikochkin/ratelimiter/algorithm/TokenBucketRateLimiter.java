@@ -41,7 +41,7 @@ public class TokenBucketRateLimiter implements RateLimiter {
             return;
         }
         long tokensSinceLastRefill = nanosSinceLastRefill / nanosToGenerationToken;
-        availableTokens = Math.max(capacity, availableTokens + tokensSinceLastRefill);
+        availableTokens = Math.min(capacity, availableTokens + tokensSinceLastRefill);
         lastRefillNanotime += tokensSinceLastRefill * nanosToGenerationToken;
     }
 }

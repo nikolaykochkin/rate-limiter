@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.exception.RateLimitExceededException;
 import name.nikolaikochkin.ratelimiter.service.ClientService;
-import name.nikolaikochkin.ratelimiter.service.RateLimitService;
+import name.nikolaikochkin.ratelimiter.service.limiter.RateLimitService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

@@ -1,4 +1,4 @@
-package name.nikolaikochkin.ratelimiter.service;
+package name.nikolaikochkin.ratelimiter.service.limiter;
 
 import name.nikolaikochkin.ratelimiter.model.Client;
 
