@@ -11,6 +11,26 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * The {@code LimitedController} class is a Spring REST controller that provides endpoints
+ * for demonstrating rate-limited operations using both Mono and Flux reactive types from
+ * Project Reactor.
+ * <p>
+ * This controller showcases the application of rate limiting on both controller and service level methods.
+ * The controller includes methods that return Mono<Void> and Flux<Void>
+ * to demonstrate how rate limiting can be applied to reactive streams in a non-blocking manner.
+ * The {@link RateLimitAsync} annotation is used to enforce rate limiting asynchronously.
+ *
+ * <p>Endpoints:</p>
+ * <ul>
+ *     <li>{@code /api/limit/controller} - Demonstrates a rate-limited Mono endpoint at the controller level.</li>
+ *     <li>{@code /api/limit/controller/flux} - Demonstrates a rate-limited Flux endpoint at the controller level.</li>
+ *     <li>{@code /api/limit/service} - Calls a rate-limited Mono method from the {@link LimitedService}.</li>
+ *     <li>{@code /api/limit/service/flux} - Calls a rate-limited Flux method from the {@link LimitedService}.</li>
+ * </ul>
+ *
+ * @see LimitedService
+ */
 @Slf4j
 @RestController
 @RequestMapping("api/limit")

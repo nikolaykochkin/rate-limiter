@@ -48,12 +48,12 @@ class TokenBucketRateLimiterTest {
 
     @Test
     void tryConsumeZero() {
-        assertThrows(AssertionError.class, () -> rateLimiter.tryConsume(0));
+        assertThrows(IllegalArgumentException.class, () -> rateLimiter.tryConsume(0));
     }
 
     @Test
     void tryConsumeNegative() {
-        assertThrows(AssertionError.class, () -> rateLimiter.tryConsume(-1));
+        assertThrows(IllegalArgumentException.class, () -> rateLimiter.tryConsume(-1));
     }
 
     @Test
