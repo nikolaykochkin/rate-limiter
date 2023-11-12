@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -86,23 +87,32 @@ class TokenBucketRateLimiterTest {
     @Test
     void tryConsumeConcurrentRefill() throws InterruptedException {
         final ExecutorService executorService = Executors.newFixedThreadPool(PERMITS);
+        final AtomicInteger successfulConsumptions = new AtomicInteger();
+        final CountDownLatch latch = new CountDownLatch(PERMITS);
 
         // Consume initial tokens
         for (int i = 0; i < PERMITS; i++) {
-            assertTrue(rateLimiter.tryConsume(1));
+            executorService.execute(() -> {
+                rateLimiter.tryConsume(1);
+                latch.countDown();
+            });
         }
 
         // Wait for tokens to refill
+        latch.await();
         Thread.sleep(PERIOD.toMillis());
 
         // Attempt to consume tokens again
         for (int i = 0; i < PERMITS; i++) {
             executorService.execute(() -> {
-                assertTrue(rateLimiter.tryConsume(1));
+                if (rateLimiter.tryConsume(1)) {
+                    successfulConsumptions.incrementAndGet();
+                }
             });
         }
 
         executorService.shutdown();
         assertTrue(executorService.awaitTermination(1, TimeUnit.SECONDS));
+        assertEquals(PERMITS, successfulConsumptions.get());
     }
 }
