@@ -7,6 +7,8 @@ package name.nikolaikochkin.ratelimiter.algorithm;
  */
 public interface RateLimiter {
 
+    boolean tryConsume();
+
     /**
      * Attempts to consume a specified number of permits from the rate limiter.
      *

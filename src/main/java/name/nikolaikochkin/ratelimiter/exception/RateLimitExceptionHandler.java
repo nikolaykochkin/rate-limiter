@@ -10,8 +10,8 @@ import org.springframework.web.reactive.result.method.annotation.ResponseEntityE
 @Slf4j
 @RestControllerAdvice
 public class RateLimitExceptionHandler extends ResponseEntityExceptionHandler {
-    @ExceptionHandler(ClientNotFoundException.class)
-    ResponseEntity<String> handleClientNotFoundException(ClientNotFoundException e) {
+    @ExceptionHandler(RateLimitKeyException.class)
+    ResponseEntity<String> handleClientNotFoundException(RateLimitKeyException e) {
         log.error("Something went wrong: {}", e.getMessage(), e);
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

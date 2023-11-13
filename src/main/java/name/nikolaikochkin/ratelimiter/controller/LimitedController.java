@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync;
 import name.nikolaikochkin.ratelimiter.service.LimitedService;
+import name.nikolaikochkin.ratelimiter.key.provider.RemoteHostAddressKeyProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,14 +40,14 @@ public class LimitedController {
     private final LimitedService limitedService;
 
     @GetMapping("controller")
-    @RateLimitAsync
+    @RateLimitAsync(RemoteHostAddressKeyProvider.class)
     public Mono<Void> limitedControllerMonoMethod() {
         log.debug("Handle limited controller Mono method");
         return Mono.empty();
     }
 
     @GetMapping("controller/flux")
-    @RateLimitAsync
+    @RateLimitAsync(RemoteHostAddressKeyProvider.class)
     public Flux<Void> limitedControllerFluxMethod() {
         log.debug("Handle limited controller Flux method");
         return Flux.empty();

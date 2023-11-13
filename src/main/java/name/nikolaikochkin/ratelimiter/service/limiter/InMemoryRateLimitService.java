@@ -2,10 +2,11 @@ package name.nikolaikochkin.ratelimiter.service.limiter;
 
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.algorithm.RateLimiter;
-import name.nikolaikochkin.ratelimiter.model.Client;
+import name.nikolaikochkin.ratelimiter.key.model.RateLimitKey;
 import name.nikolaikochkin.ratelimiter.service.factory.RateLimiterFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentMap;
 public class InMemoryRateLimitService implements RateLimitService {
 
     private final RateLimiterFactory rateLimiterFactory;
-    private final ConcurrentMap<Client, RateLimiter> buckets;
+    private final ConcurrentMap<RateLimitKey, RateLimiter> buckets;
 
     /**
      * Constructs a new {@code InMemoryRateLimitService} with the specified {@link RateLimiterFactory}.
@@ -48,10 +49,10 @@ public class InMemoryRateLimitService implements RateLimitService {
      * @throws IllegalArgumentException if the client is null
      */
     @Override
-    public boolean allowClientRequest(Client client) {
-        Assert.notNull(client, "Client must not be null");
-        RateLimiter rateLimiter = buckets.computeIfAbsent(client, key -> rateLimiterFactory.createRateLimiter());
-        log.debug("Client: {}, has limits: {}", client, rateLimiter);
-        return rateLimiter.tryConsume(1);
+    public Mono<Boolean> allowRequest(RateLimitKey rateLimitKey) {
+        Assert.notNull(rateLimitKey, "Key must not be null");
+        RateLimiter rateLimiter = buckets.computeIfAbsent(rateLimitKey, key -> rateLimiterFactory.createRateLimiter());
+        log.debug("Key: {}, has limits: {}", rateLimitKey, rateLimiter);
+        return Mono.fromCallable(rateLimiter::tryConsume);
     }
 }

@@ -3,16 +3,17 @@ package name.nikolaikochkin.ratelimiter.aspect;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.exception.RateLimitExceededException;
-import name.nikolaikochkin.ratelimiter.service.ClientService;
+import name.nikolaikochkin.ratelimiter.exception.RateLimitKeyException;
+import name.nikolaikochkin.ratelimiter.key.provider.RateLimitKeyProvider;
 import name.nikolaikochkin.ratelimiter.service.limiter.RateLimitService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 /**
  * The {@code RateLimitAspect} class implements an aspect for rate limiting in a Spring Boot application.
@@ -30,16 +31,7 @@ import reactor.core.publisher.Mono;
 @Component
 @RequiredArgsConstructor
 public class RateLimitAspect {
-    private final ClientService clientService;
     private final RateLimitService rateLimitService;
-
-    @Pointcut("@annotation(name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync) && execution(reactor.core.publisher.Mono *.*(..))")
-    public void rateLimitAsyncMethodReturnsMono() {
-    }
-
-    @Pointcut("@annotation(name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync) && execution(reactor.core.publisher.Flux *.*(..))")
-    public void rateLimitAsyncMethodReturnsFlux() {
-    }
 
     /**
      * The around advice that implements the rate-limiting logic.
@@ -50,10 +42,10 @@ public class RateLimitAspect {
      * @return The result of the method call if the rate limit check passes.
      * @throws RateLimitExceededException if the rate limit is exceeded.
      */
-    @Around("rateLimitAsyncMethodReturnsMono()")
-    public Mono<?> applyAsyncRateLimitingMono(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("@annotation(rateLimitAsync) && execution(reactor.core.publisher.Mono *(..))")
+    public Mono<?> applyAsyncRateLimitingMono(ProceedingJoinPoint joinPoint, RateLimitAsync rateLimitAsync) throws Throwable {
         log.debug("Apply async rate limiting Mono");
-        return checkLimits().switchIfEmpty((Mono<?>) joinPoint.proceed());
+        return checkLimits(joinPoint, rateLimitAsync).switchIfEmpty((Mono<?>) joinPoint.proceed());
     }
 
     /**
@@ -65,10 +57,10 @@ public class RateLimitAspect {
      * @return The result of the method call if the rate limit check passes.
      * @throws RateLimitExceededException if the rate limit is exceeded.
      */
-    @Around("rateLimitAsyncMethodReturnsFlux()")
-    public Flux<?> applyAsyncRateLimitingFlux(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around("@annotation(rateLimitAsync) && execution(reactor.core.publisher.Flux *(..))")
+    public Flux<?> applyAsyncRateLimitingFlux(ProceedingJoinPoint joinPoint, RateLimitAsync rateLimitAsync) throws Throwable {
         log.debug("Apply async rate limiting Flux");
-        return checkLimits().flux().switchIfEmpty((Flux<?>) joinPoint.proceed());
+        return checkLimits(joinPoint, rateLimitAsync).flux().switchIfEmpty((Flux<?>) joinPoint.proceed());
     }
 
     /**
@@ -78,16 +70,17 @@ public class RateLimitAspect {
      * @return {@code Mono.empty()} if client request allowed
      * {@code Mono.error()} if current context does not contain request or the rate limit is exceeded.
      */
-    private Mono<Object> checkLimits() {
-        return Mono.deferContextual(Mono::just)
-                .mapNotNull(contextView -> contextView.<ServerHttpRequest>getOrDefault(ServerHttpRequest.class, null))
-                .flatMap(clientService::clientFromHttpRequest)
-                .flatMap(client -> {
-                    if (rateLimitService.allowClientRequest(client)) {
-                        return Mono.empty();
-                    } else {
-                        return Mono.error(() -> new RateLimitExceededException(client + " has exceeded his limit."));
-                    }
-                });
+    private Mono<Object> checkLimits(ProceedingJoinPoint joinPoint, RateLimitAsync rateLimitAsync) {
+        return RateLimitKeyProvider.createInstances(rateLimitAsync.value(), joinPoint)
+                .flatMap(RateLimitKeyProvider::getRateLimitKey)
+                .filter(Objects::nonNull)
+                .next()
+                .switchIfEmpty(Mono.error(() -> new RateLimitKeyException("Key not found")))
+                .flatMap(rateLimitKey ->
+                        rateLimitService.allowRequest(rateLimitKey)
+                                .flatMap(allowed -> allowed
+                                        ? Mono.empty()
+                                        : Mono.error(() -> new RateLimitExceededException(rateLimitKey + " has exceeded his limit.")))
+                );
     }
 }

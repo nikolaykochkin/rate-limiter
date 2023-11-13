@@ -1,6 +1,7 @@
 package name.nikolaikochkin.ratelimiter.service.limiter;
 
-import name.nikolaikochkin.ratelimiter.model.Client;
+import name.nikolaikochkin.ratelimiter.key.model.RateLimitKey;
+import reactor.core.publisher.Mono;
 
 /**
  * The {@code RateLimitService} interface defines the contract for services
@@ -25,5 +26,5 @@ public interface RateLimitService {
      * @return {@code true} if the client's request is allowed; {@code false} otherwise
      * @throws IllegalArgumentException if the client is null
      */
-    boolean allowClientRequest(Client client);
+    Mono<Boolean> allowRequest(RateLimitKey rateLimitKey);
 }
