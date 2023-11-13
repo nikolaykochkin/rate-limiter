@@ -36,5 +36,7 @@ class RateLimiterApplicationTests {
     void testLimitedService() {
         StepVerifier.create(limitedService.limitedMonoMethod("123"))
                 .verifyComplete();
+        StepVerifier.create(limitedService.limitedFluxMethod())
+                .verifyComplete();
     }
 }

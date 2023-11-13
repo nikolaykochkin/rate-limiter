@@ -1,13 +1,14 @@
 package name.nikolaikochkin.ratelimiter.service.limiter;
 
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.algorithm.RateLimiter;
 import name.nikolaikochkin.ratelimiter.key.model.RateLimitKey;
 import name.nikolaikochkin.ratelimiter.service.factory.RateLimiterFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -24,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Slf4j
 @Service
+@ToString
 public class InMemoryRateLimitService implements RateLimitService {
 
     private final RateLimiterFactory rateLimiterFactory;
@@ -50,9 +52,11 @@ public class InMemoryRateLimitService implements RateLimitService {
      */
     @Override
     public Mono<Boolean> allowRequest(RateLimitKey rateLimitKey) {
-        Assert.notNull(rateLimitKey, "Key must not be null");
-        RateLimiter rateLimiter = buckets.computeIfAbsent(rateLimitKey, key -> rateLimiterFactory.createRateLimiter());
-        log.debug("Key: {}, has limits: {}", rateLimitKey, rateLimiter);
-        return Mono.fromCallable(rateLimiter::tryConsume);
+        if (Objects.isNull(rateLimitKey)) {
+            return Mono.error(new IllegalArgumentException("Key must not be null"));
+        }
+        return Mono.fromCallable(() -> buckets.computeIfAbsent(rateLimitKey, key -> rateLimiterFactory.createRateLimiter()))
+                .doOnNext(rateLimiter -> log.debug("Key: {}, has limits: {}", rateLimitKey, rateLimiter))
+                .map(RateLimiter::tryConsume);
     }
 }
