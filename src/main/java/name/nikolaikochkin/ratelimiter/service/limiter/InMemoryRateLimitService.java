@@ -14,13 +14,13 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * The {@code InMemoryRateLimitService} class implements the {@link RateLimitService} interface,
  * providing an in-memory rate limiting mechanism.
- * <p>It uses a {@link ConcurrentMap} to store and manage {@link RateLimiter} instances for each {@link Client}.</p>
+ * <p>It uses a {@link ConcurrentMap} to store and manage {@link RateLimiter} instances for each {@link RateLimitKey}.</p>
  * <p>This service delegates the creation of {@link RateLimiter} instances to a {@link RateLimiterFactory}.</p>
  *
  * @see RateLimitService
  * @see RateLimiterFactory
  * @see RateLimiter
- * @see Client
+ * @see RateLimitKey
  */
 @Slf4j
 @Service
@@ -40,13 +40,13 @@ public class InMemoryRateLimitService implements RateLimitService {
     }
 
     /**
-     * Evaluates if a request from the specified client should be allowed.
-     * This method retrieves or creates a {@link RateLimiter} for the client
+     * Evaluates if a request from the specified key should be allowed.
+     * This method retrieves or creates a {@link RateLimiter} for the key
      * and then checks if a request can be made under the current rate limit.
      *
-     * @param client the {@link Client} whose request is to be evaluated
+     * @param rateLimitKey the {@link RateLimitKey} whose request is to be evaluated
      * @return {@code true} if the request is within the rate limit and can be allowed; {@code false} otherwise
-     * @throws IllegalArgumentException if the client is null
+     * @throws IllegalArgumentException if the key is null
      */
     @Override
     public Mono<Boolean> allowRequest(RateLimitKey rateLimitKey) {

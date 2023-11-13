@@ -42,6 +42,12 @@ public class TokenBucketRateLimiter implements RateLimiter {
         this.availableTokens = permits;
     }
 
+    /**
+     * Attempts to consume one token from the bucket.
+     *
+     * @return {@code true} if the requested number of tokens were successfully consumed;
+     * {@code false} if insufficient tokens are available.
+     */
     @Override
     public boolean tryConsume() {
         return tryConsume(1);

@@ -64,11 +64,13 @@ public class RateLimitAspect {
     }
 
     /**
-     * The method receives a request from the context,
-     * transforms the request into a client object, and calls the rate-limiting logic.
+     * The method creates instances of all {@link RateLimitKeyProvider} classes
+     * passed through the {@link RateLimitAsync} annotation.
+     * Each provider creates the {@link name.nikolaikochkin.ratelimiter.key.model.RateLimitKey} key.
+     * The first non-null key will be checked by {@link RateLimitService}.
      *
-     * @return {@code Mono.empty()} if client request allowed
-     * {@code Mono.error()} if current context does not contain request or the rate limit is exceeded.
+     * @return {@code Mono.empty()} if request allowed
+     * {@code Mono.error()} if rate limit key couldn't be provided or the rate limit is exceeded.
      */
     private Mono<Object> checkLimits(ProceedingJoinPoint joinPoint, RateLimitAsync rateLimitAsync) {
         return RateLimitKeyProvider.createInstances(rateLimitAsync.value(), joinPoint)
