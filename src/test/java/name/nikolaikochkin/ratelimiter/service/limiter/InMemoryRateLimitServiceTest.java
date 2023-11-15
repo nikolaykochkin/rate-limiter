@@ -1,6 +1,6 @@
 package name.nikolaikochkin.ratelimiter.service.limiter;
 
-import name.nikolaikochkin.ratelimiter.key.model.RateLimitKey;
+import name.nikolaikochkin.ratelimiter.service.key.model.RateLimitKey;
 import name.nikolaikochkin.ratelimiter.service.factory.RateLimiterFactory;
 import name.nikolaikochkin.ratelimiter.service.factory.TokenBucketRateLimiterFactory;
 import org.junit.jupiter.api.BeforeEach;

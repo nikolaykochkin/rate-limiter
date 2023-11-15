@@ -2,8 +2,8 @@ package name.nikolaikochkin.ratelimiter.service;
 
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync;
-import name.nikolaikochkin.ratelimiter.key.provider.ClassMethodNameKeyProvider;
-import name.nikolaikochkin.ratelimiter.key.provider.RemoteHostAddressKeyProvider;
+import name.nikolaikochkin.ratelimiter.service.key.provider.ClassMethodNameKeyProvider;
+import name.nikolaikochkin.ratelimiter.service.key.provider.RemoteHostAddressKeyProvider;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

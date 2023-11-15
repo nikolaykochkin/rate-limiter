@@ -3,7 +3,7 @@ package name.nikolaikochkin.ratelimiter.service.limiter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.algorithm.RateLimiter;
-import name.nikolaikochkin.ratelimiter.key.model.RateLimitKey;
+import name.nikolaikochkin.ratelimiter.service.key.model.RateLimitKey;
 import name.nikolaikochkin.ratelimiter.service.factory.RateLimiterFactory;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;

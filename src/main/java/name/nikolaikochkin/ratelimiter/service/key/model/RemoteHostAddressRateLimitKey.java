@@ -1,4 +1,4 @@
-package name.nikolaikochkin.ratelimiter.key.model;
+package name.nikolaikochkin.ratelimiter.service.key.model;
 
 public record RemoteHostAddressRateLimitKey(String hostAddress) implements RateLimitKey {
 }

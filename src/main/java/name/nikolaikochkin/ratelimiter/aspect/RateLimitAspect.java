@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import name.nikolaikochkin.ratelimiter.exception.RateLimitExceededException;
 import name.nikolaikochkin.ratelimiter.exception.RateLimitKeyException;
-import name.nikolaikochkin.ratelimiter.key.provider.RateLimitKeyProvider;
+import name.nikolaikochkin.ratelimiter.service.key.RateLimitKeyService;
+import name.nikolaikochkin.ratelimiter.service.key.model.RateLimitKey;
+import name.nikolaikochkin.ratelimiter.service.key.provider.RateLimitKeyProvider;
 import name.nikolaikochkin.ratelimiter.service.limiter.RateLimitService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -12,8 +14,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 /**
  * The {@code RateLimitAspect} class implements an aspect for rate limiting in a Spring Boot application.
@@ -32,6 +32,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RateLimitAspect {
     private final RateLimitService rateLimitService;
+    private final RateLimitKeyService rateLimitKeyService;
 
     /**
      * The around advice that implements the rate-limiting logic.
@@ -66,16 +67,14 @@ public class RateLimitAspect {
     /**
      * The method creates instances of all {@link RateLimitKeyProvider} classes
      * passed through the {@link RateLimitAsync} annotation.
-     * Each provider creates the {@link name.nikolaikochkin.ratelimiter.key.model.RateLimitKey} key.
+     * Each provider creates the {@link RateLimitKey} key.
      * The first non-null key will be checked by {@link RateLimitService}.
      *
      * @return {@code Mono.empty()} if request allowed
      * {@code Mono.error()} if rate limit key couldn't be provided or the rate limit is exceeded.
      */
     private Mono<Object> checkLimits(ProceedingJoinPoint joinPoint, RateLimitAsync rateLimitAsync) {
-        return RateLimitKeyProvider.createInstances(rateLimitAsync.value(), joinPoint)
-                .flatMap(RateLimitKeyProvider::getRateLimitKey)
-                .filter(Objects::nonNull)
+        return rateLimitKeyService.getRateLimitKeys(rateLimitAsync.value(), joinPoint)
                 .next()
                 .switchIfEmpty(Mono.error(() -> new RateLimitKeyException("Key not found")))
                 .flatMap(rateLimitKey ->

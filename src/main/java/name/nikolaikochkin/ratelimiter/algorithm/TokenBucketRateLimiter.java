@@ -59,11 +59,11 @@ public class TokenBucketRateLimiter implements RateLimiter {
      * @param permits The number of tokens to consume from the bucket.
      * @return {@code true} if the requested number of tokens were successfully consumed;
      * {@code false} if insufficient tokens are available.
-     * @throws IllegalArgumentException if the number of requested permits is negative or zero.
+     * @throws IllegalArgumentException if the number of requested permits is negative.
      */
     @Override
     synchronized public boolean tryConsume(int permits) {
-        if (permits <= 0) {
+        if (permits < 0) {
             throw new IllegalArgumentException("Permits value should be positive");
         }
         refill();

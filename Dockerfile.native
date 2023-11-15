@@ -1,0 +1,26 @@
+# Using Oracle GraalVM for JDK 17
+FROM container-registry.oracle.com/graalvm/native-image:17-ol8 AS builder
+
+RUN microdnf update \
+ && microdnf install --nodocs \
+    findutils \
+ && microdnf clean all \
+ && rm -rf /var/cache/yum
+
+# Set the working directory
+WORKDIR /workspace/app
+
+# Copy the source code into the image for building
+COPY . /workspace/app
+
+# Build
+RUN ./gradlew clean nativeCompile
+
+# The deployment Image
+FROM container-registry.oracle.com/os/oraclelinux:8-slim
+
+EXPOSE 8080
+
+# Copy the native executable into the containers
+COPY --from=builder /workspace/app/build/native/nativeCompile/rate-limiter app
+ENTRYPOINT ["/app"]

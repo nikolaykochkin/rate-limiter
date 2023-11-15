@@ -1,6 +1,6 @@
 package name.nikolaikochkin.ratelimiter.aspect;
 
-import name.nikolaikochkin.ratelimiter.key.provider.RateLimitKeyProvider;
+import name.nikolaikochkin.ratelimiter.service.key.provider.RateLimitKeyProvider;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

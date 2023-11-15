@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import name.nikolaikochkin.ratelimiter.aspect.RateLimitAsync;
 import name.nikolaikochkin.ratelimiter.service.LimitedService;
-import name.nikolaikochkin.ratelimiter.key.provider.RemoteHostAddressKeyProvider;
+import name.nikolaikochkin.ratelimiter.service.key.provider.RemoteHostAddressKeyProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
